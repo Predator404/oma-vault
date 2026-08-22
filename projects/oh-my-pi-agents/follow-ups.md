@@ -195,15 +195,14 @@ wiring cases in `prompt-action-autocomplete.test.ts` (all green). Outstanding:
   to the current turn and drops their accumulated advice context. Add an
   incremental attach that appends one descriptor without tearing down peers.
   _(Standards / robustness)_
-- [ ] **Entity `thinkingLevel` is dropped on attach.** `AdvisorConfig` has no
-  thinking field — only the model selector's `:level` suffix carries it — so a
-  persona's configured `thinkingLevel` is lost unless encoded in its `model`
-  selector. Thread it through (append `:level` to the selector, or extend the
-  advisor descriptor). _(Spec / fidelity)_
-- [ ] **Mid-message `@@` picks don't route.** The picker fires wherever the
-  `@@`-token appears, but `parseAdvisorAddress` is anchored to message start, so
-  a `@@<name>: ` inserted mid-message is an ordinary prompt, not an address.
-  Either gate the entity picker to message start or relax the parser. _(Spec / UX)_
+- [x] **Entity `thinkingLevel` is dropped on attach.** Resolved in PR #7 (merge
+  `e0c03121a3`): `attachAddressedEntity` folds the entity's standalone
+  `thinkingLevel` into the advisor model selector (`<selector>:<level>`), skipped
+  when the selector already carries a `:level` or `@routing`. _(Spec / fidelity)_
+- [x] **Mid-message `@@` picks don't route.** Resolved in PR #7 (merge
+  `e0c03121a3`): the `@@` entity picker now only triggers at message start,
+  matching `parseAdvisorAddress`; a mid-message `@@` falls through to the file
+  picker. _(Spec / UX)_
 - [ ] **Model-driven answer unverified.** The attach/start half and picker wiring
   are deterministically tested; the addressed entity's model-driven reply is
   interactive-only (same gap as PR #2 / the direct-address push). _(Spec /
