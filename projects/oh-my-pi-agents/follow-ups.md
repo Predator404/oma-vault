@@ -58,6 +58,39 @@ Merged 2026-08-19 (`ae834aa3` → `oma`). Two-axis review passed after fixes
   `advisor-address-wiring.test.ts` (~31–37); defensible since `cwd` is also
   handed to `createAgentSession`. _(Standards / smell)_
 
+## PR #4 — fix(mnemopi): resolve blank dbPath to persistent storage (#9360)
+
+Merged 2026-08-22 (`eb836252` → `oma`, merge `9208a990`). Reviewed pre-merge
+(diff read + independent red/green test run); minimal trim-or-default fix at
+`mnemopi/config.ts:47` matching the sibling `embeddingModel` pattern. Fixes
+upstream can1357/oh-my-pi#9360. Outstanding (non-blocking):
+
+- [ ] **`embeddingApiUrl` / `llmBaseUrl` blank-string audit.** Both are read via
+  the same `settings.get(...)` as `mnemopi.dbPath` and would share the identical
+  empty-string → silent-degradation hazard if any consumer ever defaults them
+  with `??`. Only `dbPath` was fixed (the reported P1); audit both and apply the
+  same trim-or-default guard where they are consumed. _(Standards / robustness)_
+
+## PR #5 — fix(compaction): preserve post-snapshot suffix on speculative apply (#9351)
+
+Merged 2026-08-22 (`f12a7b4b` → `oma`, merge `56649e4f`). Reviewed pre-merge
+(full diff read + independent test run: speculation 11 pass, session-context 14
+pass, neighbours green). **Root cause:** an armed speculative compaction summarizes
+a prefix snapshot; when the branch advances before apply, `#commitAutoCompactionResult`
+used the armed `firstKeptEntryId` as-is and the V2 remote-replacement rebuild in
+`buildSessionContext` suppressed the kept-message loop, so post-snapshot user/tool
+turns were dropped. **Fix:** record `speculativeSuffixStartId` on the compaction
+entry at apply time and replay that suffix after the remote replacement history
+(shared V1/V2 apply path). Fixes upstream can1357/oh-my-pi#9351. Outstanding
+(non-blocking):
+
+- [ ] **V1 speculative-apply coverage gap.** The fix lands on the shared V1/V2
+  path, but the regression test in `compaction-speculation.test.ts` exercises only
+  the V2 remote-payload branch (the verified production repro). V1 was not
+  independently reproduced or asserted — add a V1 speculative-apply case that
+  advances the branch before apply and verifies the post-snapshot turn survives.
+  _(Spec / coverage)_
+
 ## Branch `fix/entity-mcp-tool-registration` — surface a resident worker's own MCP tools (not yet PR'd)
 
 Committed on a branch off `oma` (`116e7a30cb`), verified live, no PR yet.
@@ -151,14 +184,21 @@ Deep threads have their own `investigations/` note, linked here.
 
 Full module-by-module comparison of Prime Agent's daemon subsystem (SOURCE,
 `~/Work/github/PrimeAgent` @ `849c9211`) vs OMA's port, run this session via 4
-read-only scouts. **Landed 2026-08-21 (dev+tester pairs; type-clean + 164 area
-tests green; UNCOMMITTED on the working tree, pending commit/PR):** prompt-wake
-fix (route C4 prompt/steer/follow_up through `SessionPromptInjector`),
-attach/retrieval (`prompt --wait`, `transcript|logs [--last N] [--json]`,
-entity-name/id-prefix accepted everywhere, `history://<name>` paging), fail-fast
-`session_already_active` + `entity daemon status|shutdown|restart`, and
-icon/color across the `@oh-my-pi/pi-wire` `AgentSnapshot`. The items below are
-**parked by decision** — captured here so nothing is lost.
+read-only scouts. **MERGED into `oma` 2026-08-21** — retargeted onto latest
+upstream (oma `a1128ff`→`c3067a3d`, 498-commit drift resolved with zero
+conflicts; per-fix dev+tester pairs + independent retarget re-verification;
+type-clean + 370 area tests green; backup tag `backup/worktree-snapshot`). Five
+commits landed in dependency order, each also pushed as a per-fix branch:
+entity-mcp tools (`8d6120bd`), per-entity icon/color incl. daemon-wire
+`AgentSnapshot` (`6cdbfad9`), prompt-wake idle delivery (`b643458f`),
+non-interactive retrieval + fast-fail `session_already_active` + `entity daemon
+status|shutdown|restart` (`7d949a53`), post-compaction kernel state-manifest
+(`c3067a3d`). **This CLOSES the open items above:** prompt-wake gap;
+attach/retrieval ergonomics; stale-model-alias (a `daemon restart` path now
+exists); and the icon/color roster-across-the-daemon-boundary. **Still open:**
+the items below (parked by decision), plus icon/color's primary-transcript
+bubble and the cross-session PEER bridge (fast-fail + name/UUID shipped; the
+bridge itself did not).
 
 - [ ] **Cross-session PEER bridge + worker crash-recovery (architectural).**
   CORRECTION (2026-08-21, verified): the **entity-runtime broker is
@@ -205,10 +245,62 @@ icon/color across the `@oh-my-pi/pi-wire` `AgentSnapshot`. The items below are
   browser: model/effort/status, sort-by-last-message, search); client-owned vs
   resident worker distinction (one-shot cleanup grace, reconnect-cancels-cleanup);
   interactive `/heartbeat` surface (OMA is CLI-flags only). _(Feature)_
-- [ ] **Kernel-variable state / compaction (experiment running).** Whether OMP's
-  persistent `eval` kernel survives compaction + detach inside a resident worker,
-  and whether a post-compaction "live-state manifest" (re-inject kernel var
-  names/types after summary) is viable. Being investigated + prototyped by a
-  subagent this session; result directs whether the manifest ships. RLM/kernel
-  machinery itself is NOT being ported (decided — OMP `eval` already provides the
-  persistent kernel as a discrete tool). _(Experiment)_
+- [x] **Kernel-variable state / compaction — SHIPPED (`c3067a3d`).** Confirmed
+  OMP's persistent `eval` kernel survives compaction + detach (lifetime bound to
+  the AgentSession owner, not the context window), so the gap was awareness-only.
+  A post-compaction live-state manifest (`src/eval/py/state-manifest.ts` +
+  `post-compaction-manifest.ts`, wired in `sdk.ts` on `auto_compaction_end`) now
+  re-injects live kernel var names/types after each successful compaction.
+  RLM/kernel machinery was NOT ported (decided — OMP `eval` already is the
+  persistent kernel as a discrete tool). Optional follow-on: snapshot
+  `frozenset(user_ns)` at kernel init as the manifest baseline (the module
+  accepts it) instead of the hardcoded PRELUDE_BASELINE. _(Done + minor follow-on)_
+
+## Repo state & housekeeping (2026-08-21 session close)
+
+Snapshot for a fresh context — the repos are "sorted" to this shape.
+
+**Git topology (both local and `origin`):** only two branches — `main` (tracks
+`upstream/main` = `can1357/oh-my-pi`, kept for rebasing) and `oma` (the fork's
+working branch, `origin=Predator404/oh-my-pi-agent`). All feature/fix branches
+pruned. `oma` tip `c3067a3d`; `origin/oma` in sync; `main`/`origin/main` in sync.
+
+**Merged into `oma` this session** (retargeted onto latest upstream, 498-commit
+drift, zero conflicts): entity-mcp tools `8d6120bd`, per-entity icon/color incl.
+daemon-wire `AgentSnapshot` `6cdbfad9`, prompt-wake idle delivery `b643458f`,
+retrieval + fast-fail lease + `entity daemon status|shutdown|restart` `7d949a53`,
+post-compaction kernel state-manifest `c3067a3d`.
+
+**Backups (local-only tags — delete once confident):** `backup/oma-preupdate` =
+`ae834aa` (old pre-rebase oma tip; holds the old advisor / entity-daemon /
+persistent-agent branch content). `backup/worktree-snapshot` = `c76e7d7` (full
+pre-split working tree incl. the old `fix/entity-mcp-tool-registration` base).
+Every pruned branch's content is preserved here and/or as rebased equivalents in
+`oma`.
+
+**Process — PRs going forward.** This batch was merged directly (fast-forward)
+after review; from here, land changes via PRs. `gh` PR-write works now (token has
+`repo` scope). GOTCHA: for this fork `gh pr create` defaults the base repo to
+UPSTREAM — always pass `--repo Predator404/oh-my-pi-agent`.
+
+**Repo hygiene — `oma` is NOT fully green independent of our work** (pre-existing;
+worth a cleanup / upstream-sync pass): `bun run check:types` reports (1)
+`src/oma.ts:32` — `.ts`-extension import in the `oma` bin shim; (2)
+`test/blob-provider-fallback.test.ts:8` — upstream blob-broker fixture missing
+`compat` on `Model<Api>`. Plus Bucket-A biome drift in upstream `blob-broker/*`.
+None are from this session's fixes.
+
+**Verification gap — no live end-to-end smoke.** The 5 merged fixes are unit/
+integration-verified (type-clean bar the 2 above; 370 area tests) but were NOT
+exercised through a real model/daemon (avoided disturbing the live Phi entity).
+To confirm interactively: `oma entity prompt --wait`, `oma entity daemon restart`,
+and a real auto-compaction manifest injection.
+
+**Stale-model-alias — now revertible.** `entities/phi.md` was pinned to a concrete
+`anthropic/claude-opus-4-8` to dodge the stale long-resident broker. With `entity
+daemon restart` shipped, restart the broker then revert Phi to the self-updating
+`anthropic/opus` alias.
+
+**Untracked:** `.omp/skills/phi-project/` (the project-pointer stub) is left
+untracked by design; decide whether to commit it into `oma` (SPEC §7.3) or keep it
+machine-local.
