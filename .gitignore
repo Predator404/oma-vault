@@ -1,0 +1,9 @@
+# Smart Connections embedding index: regenerable + model-tied; keep out of git (SPEC §10.1)
+.smart-env/
+
+# macOS filesystem metadata
+.DS_Store
+
+# Obsidian per-machine UI state (regenerated locally; not shared)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json

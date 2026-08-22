@@ -1,0 +1,55 @@
+{
+  "data_version": 2,
+  "command_timeout": 5,
+  "templates_folder": "Templates",
+  "templates_pairs": [],
+  "trigger_on_file_creation_mode": "folder",
+  "auto_jump_to_cursor": true,
+  "jump_to_cursor_after_file_name": false,
+  "shell_path": "",
+  "user_scripts_folder": "",
+  "folder_templates": [
+    {
+      "folder": "agents",
+      "template": "Templates/Agent Note.md"
+    },
+    {
+      "folder": "personas",
+      "template": "Templates/Persona Note.md"
+    },
+    {
+      "folder": "projects",
+      "template": "Templates/Project Note.md"
+    },
+    {
+      "folder": "reference",
+      "template": "Templates/Reference Doc.md"
+    }
+  ],
+  "file_templates": [],
+  "syntax_highlighting": true,
+  "syntax_highlighting_mobile": false,
+  "enabled_templates_hotkeys": [],
+  "startup_templates": [],
+  "intellisense_render": 0,
+  "ignore_folders_on_creation": [
+    {
+      "folder": "Templates"
+    },
+    {
+      "folder": "personas/phi/oh-my-pi"
+    },
+    {
+      "folder": "personas/phi/prime-agent"
+    },
+    {
+      "folder": "personas/phi/pi"
+    },
+    {
+      "folder": "personas/phi/oh-my-pi-agent"
+    },
+    {
+      "folder": "reference/obsidian/templater"
+    }
+  ]
+}
