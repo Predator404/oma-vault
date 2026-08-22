@@ -91,6 +91,63 @@ entry at apply time and replay that suffix after the remote replacement history
   advances the branch before apply and verifies the post-snapshot turn survives.
   _(Spec / coverage)_
 
+## Direct push — fix(oma/advisor): surface direct-address answers regardless of severity
+
+Pushed direct to `oma` 2026-08-22 (`719bede6fc`; lint-green chore `9b756ec6c7`
+sorts imports in the PR #4 mnemopi test), NOT PR'd — user directed merge/push.
+Independently verified (subagent PASS: advisor suite 167 pass / 0 fail; idle +
+no-severity address now routes `preserve`, not `aside`). **Root cause:** a
+`@@<name>:` reply emitted with a non-interrupting severity (nit / no severity —
+the natural choice for an informational answer) routed to the `aside` channel,
+whose advisor dispatcher is `skipIdleFlush:true`; after the primary deferred and
+went idle the answer stranded in the yield queue until the next user prompt
+("Phi will answer but nothing happens"). `concern`/`blocker` answers surfaced
+via preserve/steer, masking it. **Fix:** thread a `directAddress` signal from the
+defer site (`agent-session.ts` `markDirectAddress`) through `SessionAdvisors`
+(`#pendingDirectAddress`, consumed in `#routeAdvice`) into
+`resolveAdvisorDeliveryChannel`, which now returns `preserve` (idle) / `steer`
+(streaming) for a direct-address note regardless of severity. Outstanding
+(non-blocking):
+
+- [ ] **Session-level delivery integration test.** Only the resolver branch is
+  unit-tested (`advisor.test.ts`); the end-to-end route — `markDirectAddress` →
+  `#routeAdvice` consume → visible preserved card while idle — has no
+  deterministic test. Folds into PR #2's still-open deferral integration test:
+  one session-level test should cover both the deferral directive push AND the
+  advisor's no-severity answer surfacing while idle. _(Spec / coverage)_
+- [ ] **Live end-to-end still unverified.** Same interactive gap as PR #2's
+  "Live end-to-end unverified" — the no-severity `@@Phi:` answer surfacing while
+  idle was found by code inspection, not exercised through a real model/daemon.
+  _(Spec / coverage — interactive)_
+- [ ] _(latent, documented)_ `directAddress` wins over `preserveOnly` in
+  `resolveAdvisorDeliveryChannel`; safe today because `preserveOnly` is set only
+  by the headless drain after the primary loop stops streaming (resolves to
+  `preserve`), but a future caller setting `preserveOnly` during an active stream
+  with a pending direct address could bypass the headless-drain intent. Guarded
+  by an inline comment at the branch. _(Standards / latent)_
+- [ ] **Open the PR.** Direct-pushed per instruction; going-forward convention is
+  PRs (`gh pr create --repo Predator404/oh-my-pi-agent`). _(Delivery)_
+
+## Direct push — chore(oma/process): make follow-up-register updates a binding AGENTS.md rule
+
+Pushed direct to `oma` 2026-08-22 (repo-root `AGENTS.md`), NOT PR'd. Independently
+reviewed (reviewer APPROVE, 0.86: `AGENTS.md` is the correct enforcement point).
+**Root cause:** the coding agent reliably updated `CHANGELOG.md` on completion but
+NOT this register, because the changelog rule lives in the binding, auto-loaded
+`AGENTS.md` while the follow-up convention lived only in the vault
+([[decisions/0003-pr-follow-up-register.md]]) and advisor guidance — no standing
+instruction for the agent. **Fix:** added a `## Follow-ups` section to `AGENTS.md`
+(after `## Changelog`, before `## Releasing`), parallel in force — a change is not
+"done" until BOTH the changelog and this register are updated; marked OMA-fork-only
+so upstream rebases don't carry it. Outstanding (non-blocking):
+
+- [ ] **Efficacy unverified over time.** The rule is in place; whether it actually
+  changes agent behavior across future sessions can only be confirmed by
+  observation. _(Process / verification)_
+- [ ] **Permanent local delta.** The `~/vault/...` path makes the section a
+  fork-local delta to preserve across every upstream `AGENTS.md` rebase/merge.
+  _(Standards / maintenance)_
+
 ## Branch `fix/entity-mcp-tool-registration` — surface a resident worker's own MCP tools (not yet PR'd)
 
 Committed on a branch off `oma` (`116e7a30cb`), verified live, no PR yet.
