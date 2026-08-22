@@ -172,6 +172,44 @@ wire `setOnToolsChanged → refreshMCPTools`, mirroring the owner path). Discove
   but a broker restart is the clean cutover — shared with the stale-alias item
   below. _(Ops)_
 
+## PR #6 — feat(oma): `@@` entity picker + attach-on-address
+
+Merged 2026-08-22 ([PR #6](https://github.com/Predator404/oh-my-pi-agent/pull/6),
+commit `26774b6300`, merge `e20f7436bf` → `oma`). Autocomplete: single `@`
+stays the file picker, `@@` opens an entity (persona/agent) picker over the OMA
+registry inserting `@@<name>: `, `@@@` escapes back to the file picker with a
+single `@` populated (provider-level interception in
+`modes/prompt-action-autocomplete.ts` + new `modes/entity-autocomplete.ts`;
+editor re-queries on every keystroke while the popup is open, so the `@`-count
+swaps the list live). Lifecycle: `SessionAdvisors.attachAddressedEntity` resolves
+a `@@<name>:` address against `discoverEntities`/`resolveEntityConfig` and
+attaches the entity as an advisor (persona body → advisor `instructions`),
+starting the advisor subsystem when off; wired into the submit path in
+`agent-session.ts` and exposed as `AgentSession.attachAddressedAdvisor`. Tests:
+`entity-autocomplete.test.ts`, `advisor-address-attach.test.ts`, and provider
+wiring cases in `prompt-action-autocomplete.test.ts` (all green). Outstanding:
+
+- [ ] **Attach rebuilds the whole roster.** `attachAddressedEntity` does
+  `#stopAdvisorRuntime()` + `#buildAdvisorRuntime(true)` because the build path
+  has no incremental single-advisor append; this reseeds existing advisor peers
+  to the current turn and drops their accumulated advice context. Add an
+  incremental attach that appends one descriptor without tearing down peers.
+  _(Standards / robustness)_
+- [ ] **Entity `thinkingLevel` is dropped on attach.** `AdvisorConfig` has no
+  thinking field — only the model selector's `:level` suffix carries it — so a
+  persona's configured `thinkingLevel` is lost unless encoded in its `model`
+  selector. Thread it through (append `:level` to the selector, or extend the
+  advisor descriptor). _(Spec / fidelity)_
+- [ ] **Mid-message `@@` picks don't route.** The picker fires wherever the
+  `@@`-token appears, but `parseAdvisorAddress` is anchored to message start, so
+  a `@@<name>: ` inserted mid-message is an ordinary prompt, not an address.
+  Either gate the entity picker to message start or relax the parser. _(Spec / UX)_
+- [ ] **Model-driven answer unverified.** The attach/start half and picker wiring
+  are deterministically tested; the addressed entity's model-driven reply is
+  interactive-only (same gap as PR #2 / the direct-address push). _(Spec /
+  coverage — interactive)_
+- [x] **Commit + PR.** Committed, PR'd, and merged (PR #6 → `oma`, merge `e20f7436bf`). _(Delivery)_
+
 ## Project open items (not tied to a single PR)
 
 Carried out of the persistent-agents build resume-doc (`personas/phi/oh-my-pi-agent/HANDOFF.md`)
