@@ -25,8 +25,20 @@ the persona corpus, not this note; link back to it rather than restating it.
 - **`@@name:` mention-addressing** — Case A (address the in-session advisor,
   e.g. `@@Phi:`) accepted and being built; Case B (address a different resident
   worker over the daemon) deferred. See [[decisions/0001-mention-addressing.md]].
-- **Note-system layout** — persona design corpus vs project-dev split, one
-  vault, connected by wikilinks. See [[decisions/0002-note-system-layout.md]].
+- **Note-system layout** — persona design corpus vs project-dev split, connected
+  by wikilinks; the one-vault part is superseded for multi-domain by ADR 0004.
+  See [[decisions/0002-note-system-layout.md]].
+- **Registry domains** — split the vault into per-domain *registries* (`oma`
+  public, `capitec` private): hermetic entities, directional read (private→public,
+  plus explicit named private→private grants via `readableBy`), registry manifest,
+  path-jailed multi-root vault MCP. Reverses 0002's single-vault call on
+  confidentiality grounds. **Implemented + migrated live** (branch `oma`,
+  uncommitted): manifest at `~/.oma/agent/registries.json`; `oma` root =
+  `~/oma-registry/vault` (the existing vault repo — `~/vault` still points here, so
+  `@~/vault/...` stubs keep resolving), `capitec` = `~/capitec-registry` (new private
+  git repo, empty scaffold). Entity record `phi.md` relocated into the oma vault's
+  `entities/`. NB: live agent dir is `~/.oma/agent` (not the stale `~/.omp`).
+  See [[decisions/0004-registry-domains.md]].
 - **Dense embeddings not contributing** — `phi` memory-bank recall is
   lexical-only; the dense voice scores 0. See
   [[investigations/dense-embeddings.md]].
@@ -43,6 +55,10 @@ the persona corpus, not this note; link back to it rather than restating it.
   wired at retain time / model-dim mismatch)? — [[investigations/dense-embeddings.md]]
 - When does the peer-reply return channel (SPEC WS5) land, unblocking
   mention-addressing Case B? — [[decisions/0001-mention-addressing.md]]
+- `capitec` registry contents (purpose + entity roster) are intentionally
+  open-ended; provisioned as an empty private scaffold with the deferred item
+  tracked in `~/capitec-registry/README.md` (Follow-ups). Not blocking. —
+  [[decisions/0004-registry-domains.md]]
 
 ## Links
 

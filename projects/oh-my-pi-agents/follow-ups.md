@@ -21,6 +21,36 @@ Mark an item `[x]` when addressed (ideally by the PR that resolves it); leave
 `[ ]` while open. Deep technical threads get their own note under
 `investigations/` and are linked from here rather than restated.
 
+## Registry domains (ADR 0004) — feat(oma/registry): per-domain vault isolation
+
+Pushed to `oma` (PR pending). Two-axis cross-seam review passed with **zero
+blocking findings** (both axes "correct"). Outstanding (all non-blocking):
+
+- [ ] **Dedup registry-resolution + the `{id,root,visibility}` triple.**
+  `registriesToScan` (loader.ts) and `resolveTargetRegistry` (record-writer.ts)
+  repeat the explicit-root + manifest-fallback blocks, and the triple is declared
+  as both `ScanRegistry` and `TargetRegistry`; `mcp-wiring.ts` repeats the
+  manifest-load idiom. Hoist one shared resolver + type into `registries.ts`
+  (Central-Utilities rule). _(Standards / Duplicated Code — review #1)_
+- [ ] **Drop speculative surface.** `RegistryManifestOptions.fallbackRoot` (no
+  caller sets it) and `visibleRegistryIds` (only a test consumes it — the vault
+  bridge has its own `registryIds()`). _(Standards / Speculative Generality — review #3)_
+- [ ] **Dedup the `"oma"` default constant.** `vault.ts` re-declares
+  `DEFAULT_HOME_REGISTRY_ID = "oma"` vs `registries.ts` `DEFAULT_REGISTRY_ID`;
+  comment the deliberate vault-mcp↔entity decoupling, or share a low-level const.
+  _(Standards / Duplicated Code — review #2)_
+- [ ] **Exclude `entities/` from the oma vault index.** The relocated
+  `entities/phi.md` now lives inside the oma vault root, so Smart Connections /
+  Obsidian surface entity records as knowledge notes. Add a search/index
+  exclusion. _(parked; routed to Phi)_
+- [ ] _(intentional, note only)_ Public banks are not registry-prefixed
+  (private-only namespace, to avoid orphaning `phi`'s bank); the `~/vault` drop is
+  opt-in (`dropLegacyVaultSymlink`). Both deviate from the literal ADR 0004 text —
+  reconcile the ADR wording if the behavior is confirmed. _(Spec — deliberate)_
+
+Capitec-side follow-up (define the domain's purpose + entity roster) lives in
+`~/capitec-registry/README.md`, not here (private registry).
+
 ## PR #1 — fix(oma/entity): persist detached broker + clean CLI exit + caller cwd
 
 Merged 2026-08-19 (`f0093bb0` → `oma`). Two-axis code review passed with zero
@@ -273,6 +303,42 @@ Deep threads have their own `investigations/` note, linked here.
   directions: [[investigations/cross-session-hub-peering.md]]. Same
   daemon-delivery domain as PR #1 and the attach-retrieval / prompt-wake gaps;
   not in any of them. _(Spec / functional)_
+- [ ] **Sticky default entity — session-scoped primary switch (feature).**
+  Requested 2026-08-24. Add a formal mechanism to promote an entity to the
+  session's **default interlocutor** for the rest of the session — every
+  subsequent user turn routes to it without a per-message `@@<name>:` prefix —
+  until reverted (back to the base primary) or switched to another entity. This
+  is the sticky counterpart to the existing per-message `@@<name>:` addressing
+  (PR #2) and the `@@` picker + attach-on-address (PR #6): those address one
+  turn; this pins the default across turns. Design points: a switch verb (e.g.
+  `@@<name>` with no colon/body, or a `/entity use <name>` + `/entity revert`
+  command), a persisted per-session "active primary" pointer, a visible TUI
+  indicator of who is currently primary, and interaction with the deferral/attach
+  path (the switched-to entity must be attached as it is under `@@<name>:`).
+  Relates to the "accept `@@agentname` without the colon" notation follow-up.
+  _(Feature / UX)_
+- [ ] **Vault "spaces" split — discuss (note-system design).** Requested
+  2026-08-24. Evaluate splitting the currently single vault into multiple spaces
+  (Obsidian workspaces / separate vault roots / top-level space partitions)
+  rather than the one-vault-with-wikilinks arrangement of record. Revisits
+  [[decisions/0002-note-system-layout.md]] (persona design corpus vs project-dev
+  split, one vault, connected by wikilinks). Trade to weigh: isolation /
+  access-boundary / per-space tooling & sync vs. loss of cross-space wikilinks,
+  memory-bank/embedding index scoping, and Smart Connections' single-vault
+  assumption. Decide whether a split earns the cost or the wikilinked single
+  vault stays; if split, record as a new ADR superseding 0002. _(Design /
+  discussion)_
+- [ ] **`last` command — reload the last session (feature).** Requested
+  2026-08-24. Add a CLI entry `oma last` that resumes/reloads the most recent
+  session (the previous conversation's context/transcript) rather than starting
+  fresh. Must be **compatible with specifying the primary agent** — e.g. `oma
+  last --agent <name>` (or the same primary-selection surface a normal launch
+  uses) so the reloaded session can open under a chosen primary entity. Ties
+  into the sticky-default-entity switch above: reloading last + choosing primary
+  is the launch-time counterpart of the in-session switch. Design points:
+  resolve "last" (per-cwd? global most-recent?), how transcript/kernel state is
+  rehydrated, and precedence when `--agent` differs from the session's original
+  primary. _(Feature / CLI)_
 
 ## Parked — Prime↔OMA comparison (2026-08-21)
 
@@ -398,3 +464,51 @@ daemon restart` shipped, restart the broker then revert Phi to the self-updating
 **Untracked:** `.omp/skills/phi-project/` (the project-pointer stub) is left
 untracked by design; decide whether to commit it into `oma` (SPEC §7.3) or keep it
 machine-local.
+
+## Confluence page maintenance for Phi (research done; not started)
+
+Standing initiative (2026-08-24): Phi to create and maintain three Confluence
+pages — **Overview** (what OMA is; benefits over stock Claude CLI / other
+harnesses), **Roadmap** (done vs planned), **Changelog** (bugfixes + feature
+enhancements as they land). Research on the correct tooling is complete; build
+deferred pending Capitec-side answers. **Key constraint: this is a Capitec
+(regulated-bank) corporate environment** — governance, data residency, and
+approvability dominate over convenience.
+
+**Tooling landscape (three approaches):**
+- **Official Atlassian Rovo remote MCP** (`atlassian/atlassian-mcp-server`, GA
+  Feb 2026) — hosted by Atlassian, OAuth 2.1 / API token, create+update+append
+  page tools, permission-respecting. **Cloud-only**; external hosted endpoint.
+- **Community self-hosted MCP** — `sooperset/mcp-atlassian` (stdio/Docker,
+  Python; Cloud **+ Server + Data Center**; API-token/PAT). Third-party runtime.
+- **Repo-local REST skill** — no MCP; Confluence REST (`/wiki/rest/api/content`
+  v1, or `/wiki/api/v2/pages` v2). Update = `PUT` needing current version+1
+  (optimistic lock); body is **"storage" XHTML**, not Markdown.
+
+**Recommendation for a regulated bank (ranking inverts vs. general case):** lead
+with the **repo-local `Confluence-Pages` skill over the DC REST API**, PAT via
+env, talking directly to the internal (VPN) Confluence host. Most approvable:
+diff-reviewable, no third-party runtime, no data egress beyond existing internal
+Confluence. `sooperset` self-hosted MCP is the fast-follow if sanctioned;
+Rovo-remote only if Capitec is on Cloud *and* InfoSec approves the external
+endpoint. Either MCP path wires into OMA via `.omp/mcp.json` (loader confirmed:
+`config/mcp-schema.json` + `discovery/builtin.ts`, supports
+`stdio|sse|http`, `${ENV}` expansion). The skill owns the policy layer regardless
+of backend: space key, three pinned page IDs, replace (Overview/Roadmap) vs
+append (Changelog), storage-format + version-bump handling, maintenance cadence.
+
+**Blocking unknowns (Capitec-side; needed before building):**
+- [ ] **Confluence Data Center or Cloud?** — picks REST-skill/`sooperset` vs
+  Rovo-remote (Rovo is Cloud-only). _(Blocking / deployment)_
+- [ ] **Any AI→Confluence integration already sanctioned by InfoSec?** — use the
+  approved route rather than introducing a new one. _(Blocking / governance)_
+- [ ] **Auth mechanism issued (PAT vs OAuth) + how secrets are stored.** Never
+  commit tokens; env injection from the bank secret store. _(Blocking / auth)_
+- [ ] **Target space key + do the three pages already exist?** — resolve-by-title
+  once, then pin IDs for idempotent updates. _(Blocking / target)_
+- [ ] **Build the `Confluence-Pages` skill (+ `mcp.json` if MCP route chosen).**
+  Nothing created yet — deployment/auth answers are load-bearing. _(Delivery)_
+
+Sources: atlassian.com/blog/announcements/atlassian-rovo-mcp-ga ·
+github.com/atlassian/atlassian-mcp-server · github.com/sooperset/mcp-atlassian ·
+developer.atlassian.com/cloud/confluence/rest/v2 · scalekit.com/blog/confluence-mcp-vs-api

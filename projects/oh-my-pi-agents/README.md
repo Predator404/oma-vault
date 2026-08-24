@@ -28,6 +28,7 @@ projects/oh-my-pi-agents/
     0001-mention-addressing.md
     0002-note-system-layout.md
     0003-pr-follow-up-register.md
+    0004-registry-domains.md
   investigations/    ← open technical investigations
     dense-embeddings.md
     prompt-wake-gap.md
@@ -35,6 +36,12 @@ projects/oh-my-pi-agents/
 
 ## Active dev threads
 
+- **Registry domains** — split the vault into per-domain registries (`oma`
+  public, `capitec` private) for hard confidentiality isolation: hermetic
+  entities, directional read (private→public + named private→private grants),
+  path-jailed vault MCP. Supersedes
+  the single-vault ADR 0002; spec'd, pending implementation sign-off. See
+  [[decisions/0004-registry-domains.md]].
 - **`@@name:` mention-addressing** — a `@@<agentName>: <message>` convention to
   direct a message at a specific entity. Case A (address the in-session advisor)
   being built now; Case B (address a different resident worker) deferred. See

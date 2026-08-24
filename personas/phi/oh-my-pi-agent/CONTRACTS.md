@@ -45,6 +45,7 @@ New/formalized fields:
 - `memory: { backend: "mnemopi"; bank: <string>; autoRetain: boolean }` — bank binding (C2). `autoRetain`
   MUST be `true` only for `role: agent`; `persona` records reject `autoRetain: true` at load (curated-only).
 - `vaultSection: <path>` — owned vault subtree (e.g. `agents/<name>` | `personas/<name>`), §7.
+- `registry: <id>` — home registry id (ADR 0004; see [[projects/oh-my-pi-agents/decisions/0004-registry-domains.md]]). Key into the registries manifest that resolves the writable vault root, the readable set (own + public + granted-private), the records root, and the memory-bank namespace. `vaultSection` is relative to the home registry's root. Populated by the loader from the record's registry; a `private` registry's `memory.bank` MUST be namespaced `<id>/<bank>`.
 - `watchdog?: <WATCHDOG.yml entry>` — optional standing-advisor config.
 - `hosting?: { modelEndpoint?: <provider-id> }` — optional local/cloud pin (§9; default deferred).
 
