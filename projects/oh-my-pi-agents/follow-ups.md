@@ -51,6 +51,38 @@ blocking findings** (both axes "correct"). Outstanding (all non-blocking):
 Capitec-side follow-up (define the domain's purpose + entity roster) lives in
 `~/capitec-registry/README.md`, not here (private registry).
 
+## Phi process/tooling follow-ups (raised 2026-08-24)
+
+Raised as `@@phi:` asides during the registry-domains session; Phi to formalize
+at a later date (non-blocking).
+
+- [ ] **omp → oma naming sweep.** Update lingering `omp`/`.omp` references that
+  should read `oma`/`.oma` (prompt/instruction text, doc mirrors, env-var
+  names/comments like `OMP_VAULT_PATH`/`OMP_ENTITY_REGISTRY`, user-facing copy).
+  Decide the `OMP_*` env-var policy (keep for compat vs `OMA_*` aliases) and
+  whether the stale `~/.omp` dir is migrated/retired. _(Evidence: live agent dir
+  is `~/.oma/agent`; a stale `~/.omp/agent` still exists.)_
+- [ ] **Formalize parallelism + skill terminology/rules (per Claude CLI).** Make
+  the subagent fan-out model (integration owner, disjoint file ownership,
+  skip-mid-flight validation) and skill terminology explicit as skill/rules;
+  review the YouTube channel for future OMA enhancements and triage into the
+  backlog.
+- [ ] **Formalize review skills.** Turn the cross-seam two-axis (Standards +
+  Spec) review workflow into a durable skill + rules.
+
+## Vault / Obsidian semantic search — model load failure (likely security/proxy)
+
+- [ ] **Semantic (vector) search is not working: the embedding model fails to
+  load.** The vault MCP's `TransformersEmbedder` (`vault-mcp/embedder.ts`) fetches
+  its model from the HuggingFace hub (cached under `~/.cache/huggingface`) on
+  first use, and Smart Connections' `.smart-env/` index depends on it. The load
+  is failing — **likely a security/network issue** (corporate proxy / TLS
+  intercept blocking the HF download), consistent with the earlier finding that
+  the proxy blocked `bge-micro-v2` (fell back to `all-MiniLM-L6-v2`). Repro,
+  capture the real load error, and choose a fix: pre-provision the model into the
+  cache offline, point at an allowed mirror/endpoint, or bundle a local model.
+  Until resolved, vault recall is lexical-only. _(Investigation)_
+
 ## PR #1 — fix(oma/entity): persist detached broker + clean CLI exit + caller cwd
 
 Merged 2026-08-19 (`f0093bb0` → `oma`). Two-axis code review passed with zero
@@ -465,7 +497,7 @@ daemon restart` shipped, restart the broker then revert Phi to the self-updating
 untracked by design; decide whether to commit it into `oma` (SPEC §7.3) or keep it
 machine-local.
 
-## Confluence page maintenance for Phi (research done; not started)
+## Confluence page maintenance for Phi (vault drafts created; Confluence publish blocked)
 
 Standing initiative (2026-08-24): Phi to create and maintain three Confluence
 pages — **Overview** (what OMA is; benefits over stock Claude CLI / other
@@ -474,6 +506,19 @@ enhancements as they land). Research on the correct tooling is complete; build
 deferred pending Capitec-side answers. **Key constraint: this is a Capitec
 (regulated-bank) corporate environment** — governance, data residency, and
 approvability dominate over convenience.
+
+**Update 2026-08-24 — vault drafts created.** All three pages now exist as
+Markdown in the vault at `projects/oh-my-pi-agents/confluence/{Overview,Roadmap,Changelog}.md`
+(sources: SPEC/HANDOFF corpus, this register, and the `oma`-branch git/PR
+history). This is the reviewable source the future `Confluence-Pages` skill will
+push from; the pages are written for Ross's review/edit before any publish.
+Decision recorded (Ross, 2026-08-24): the Changelog carries **two version
+tracks** — an upstream-synced `omp X.Y.Z` (moves only on rebase; pure OMP-core
+fixes ride the OMP changelog) and an `oma-agent X.Y.Z` SemVer keyed to
+agent-portion PR merges (feature→minor, fix→patch). Current: `oma-agent 0.7.0`
+on `omp 18.0.0`. **Still blocked** (Confluence publish + the skill): the
+Capitec-side answers below.
+
 
 **Tooling landscape (three approaches):**
 - **Official Atlassian Rovo remote MCP** (`atlassian/atlassian-mcp-server`, GA
