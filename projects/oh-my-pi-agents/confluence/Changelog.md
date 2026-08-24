@@ -11,7 +11,7 @@ updated: 2026-08-24
 
 > Confluence-bound page. Dated from the `oma` branch commit and PR history
 > ([Predator404/oh-my-pi-agent](https://github.com/Predator404/oh-my-pi-agent)).
-> Appended to as work lands. Ross to review the version assignments.
+> Appended to as work lands.
 
 ## Two version tracks
 
@@ -19,7 +19,7 @@ OMA carries **two independent version numbers**:
 
 - **`omp` (upstream-synced)** — the OMP release OMA is rebased onto. It moves
   **only on an upstream rebase**, not on OMA's own work. Current base:
-  **`omp 18.0.0`**. Pure OMP-core fixes that we contribute back upstream (e.g.
+  **`omp 18.0.4`**. Pure OMP-core fixes that we contribute back upstream (e.g.
   the mnemopi and compaction fixes below) belong to this track and ride the OMP
   changelog, not the agent one.
 - **`oma-agent`** — SemVer keyed to **agent-portion PR merges**: a feature bumps

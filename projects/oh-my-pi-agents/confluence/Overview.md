@@ -45,6 +45,8 @@ rewrite. The discrete-tool model (`read`/`edit`/`bash`/`task`/MCP/skills) is
 exactly OMP's; it deliberately does **not** adopt Prime Agent's single-tool
 Python/RLM kernel model.
 
+**Multiple workstreams:** A fork of T3-code already supports omp and oma concurrently. This brings the ability for the user to easily manage multiple workstreams simultaeously - this feature is still in early testing though.
+
 ## Memory & context
 
 Context is one of the hardest problems in AI-assisted development: a model only
@@ -155,9 +157,8 @@ flowchart TD
     sessA <--> vault
 ```
 
-The supervisor owns routing, attach/detach, peer delivery, and health only. It
-runs no providers, tools, compaction, or scheduling execution — that all lives in
-the workers. This is the boundary that made the port tractable.
+The supervisor owns routing, attach/detach, peer delivery, and health. The workers 
+run providers, tools, compaction, and scheduling execution.
 
 ## Where other harnesses are ahead
 
@@ -169,7 +170,7 @@ I want OMA to be genuinely good, so this section is deliberately not flattering.
   features are "verified live, not tested" today (see Roadmap / follow-up
   register).
 - **IDE integration.** Cursor lives inside the editor with inline diffs, tab
-  completion, and deep repo indexing. OMA is terminal-first.
+  completion, and deep repo indexing. OMA is terminal-first with a move into T3 code already implemented on its own fork but yet to be tested.
 - **OMP itself is broader and better maintained.** OMA is a thin layer on top of
   a fast-moving upstream. For anyone who does not need persistence or a
   multi-entity roster, stock OMP is simpler and gets every upstream fix
@@ -205,11 +206,3 @@ I want OMA to be genuinely good, so this section is deliberately not flattering.
 | Commercial polish / hosted reliability              | ❌           | ❌                          | ✅           | ✅          | ❌                         |
 | Worker crash-recovery maturity                      | partial     | n/a                        | n/a         | n/a        | ✅                         |
 
-## Links
-
-- Design of record: [[personas/phi/oh-my-pi-agent/SPEC.md|SPEC]] ·
-  [[personas/phi/oh-my-pi-agent/CONTRACTS.md|CONTRACTS]] ·
-  [[personas/phi/oh-my-pi-agent/HANDOFF.md|HANDOFF]]
-- Fork: [Predator404/oh-my-pi-agent](https://github.com/Predator404/oh-my-pi-agent)
-- Upstream: [can1357/oh-my-pi](https://github.com/can1357/oh-my-pi)
-- Companion pages: [[Roadmap]] · [[Changelog]]

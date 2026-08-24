@@ -10,9 +10,8 @@ updated: 2026-08-24
 # OMA — Roadmap
 
 > Confluence-bound page. "Shipped" is drawn from merged work on the `oma` branch;
-> "Ideas" from the open items in [[follow-ups]]. Scoped to features a **user of
-> OMA** would care about — internal refactors, test-coverage gaps, and
-> housekeeping are omitted. Ross to review.
+> "Ideas" from the open items in [[follow-ups]]. internal refactors, test-coverage gaps, and
+> housekeeping are omitted.
 
 ## How to read this
 
@@ -69,6 +68,9 @@ updated: 2026-08-24
 
 ## 🔜 Next
 
+- Moving UI into a T3-code fork to allow multiple workflows simultaneously. This is already implemented but not yet ready for general use.
+- Using sandcastle to transparently handle agent sandboxing - creating worktrees and isolating agents automatically as they are spun up - so paralell development streams can run autonomously without risking the host machine. 
+- Ability to dictate instead of type into the interface
 - **Sticky default entity** — promote an entity to the session's default
   interlocutor for the rest of the session (no per-message `@@` prefix) until
   reverted, with a visible TUI indicator. The across-turns counterpart to
@@ -81,7 +83,6 @@ updated: 2026-08-24
 - **Self-updating model alias fix** — a supported broker-restart path so entities
   can use the self-updating `anthropic/opus` alias instead of a pinned concrete
   id.
-
 ## 💡 Ideas (proposed, not committed)
 
 - **Cross-session peer bridge** — register a resident entity as an addressable
@@ -110,10 +111,6 @@ updated: 2026-08-24
   Recorded heuristic: narrow high-volume/privacy-sensitive personas run local,
   the complex-reasoning coordinator stays cloud. Workstation is Apple M5, so
   local inference is viable when this reopens.
-- **Vault "spaces" split** — whether to split the single wikilinked vault into
-  separate spaces/roots. Trade isolation and per-space tooling against loss of
-  cross-space links and Smart Connections' single-vault assumption. Revisits
-  ADR 0002; decide if the split earns its cost.
 
 ## Known constraints (worth stating)
 
