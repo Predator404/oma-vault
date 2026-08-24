@@ -14,7 +14,7 @@ updated: 2026-08-24
 
 ## What OMA is
 
-OMA (**O**h **M**y Pi - **A**gents) is a hackable model harness that provides local-first **persistent, AI entities that have built-in RAG generation and retrieval capabilties**. Built on top of [Oh My Pi (OMP)](https://github.com/can1357/oh-my-pi), with the persistent agent layer being inspired by(and borrowing heavily from) the iypthon-centric omp fork Prime Agent.
+OMA (**O**h **M**y Pi — **A**gents) is a hackable, local-first model harness for **persistent AI entities with built-in RAG generation and retrieval**. It builds on [Oh My Pi (OMP)](https://github.com/can1357/oh-my-pi); the persistent-agent layer is inspired by — and borrows heavily from — the IPython-centric OMP fork Prime Agent.
 
 ***Benefits over stock Claude:*** 
 
@@ -26,100 +26,106 @@ OMA (**O**h **M**y Pi - **A**gents) is a hackable model harness that provides lo
 
 **A roster of named, individually configured entities in one system:** Distinct
   model, memory bank, tool grants, and voice per entity. Address one directly
-  with `@@<name>:`, or pull it in with the `@@` picker.  The first of these is Phi.
+  with `@@<name>:`, or pull it in with the `@@` picker. The first of these is Phi.
 
-**Phi is a persona that ships with OMA** that provides tooling assistance while the user works. 
-it has full awareness of the features and capabilities of OMA. So it teaches you how to use OMA as you work - allowing you to refine your workflow on the go.
+**Phi is a persona that ships with OMA** that assists while you work. Phi has
+full awareness of OMA's features and capabilities, so it teaches you how to use
+OMA as you go — letting you refine your workflow on the fly.
 
 **Durable agent sessions:** Where a normal coding-agent session lives and dies with one terminal, OMA runs a daemon so its entities outlive the terminal: you can detach, close the window, reattach later, and the entity is still there with its state intact. Entities can
 also be woken on a schedule, a heartbeat, or a durable goal with nobody attached,
 and they can message each other directly.
 
- **A shared, human-browsable knowledge vault with hybrid retrieval:** Plain
+**A shared, human-browsable knowledge vault with hybrid retrieval:** Plain
   Markdown you can open in Obsidian, git-diffable, with vector search over the
   same notes the wikilink graph connects. Not a hidden vector blob.
 
+OMA keeps OMP's native tool surface unchanged — an additive graft, not a
+rewrite. The discrete-tool model (`read`/`edit`/`bash`/`task`/MCP/skills) is
+exactly OMP's; it deliberately does **not** adopt Prime Agent's single-tool
+Python/RLM kernel model.
 
-## Context
+## Memory & context
 
-The OMA agent layer attempts to address one of the greatest challenges relating to ai-assisted development: context. OMA has various memory-related features to help in this regard: 
+Context is one of the hardest problems in AI-assisted development: a model only
+performs while the right information is in front of it. OMA's memory features
+keep that context durable and scoped.
 
-**A three-layer memory model.** OMA separates memory by *what* is remembered and
+**A three-layer memory model** separates memory by *what* is remembered and
 *who* remembers it:
 
-- **Episodic (agent tier)** — conversation turns captured automatically. Agents
+- **Episodic (agent tier)** — conversation turns, captured automatically. Agents
   auto-recall relevant history on start and auto-retain every few turns, so a
-  coordinator picks up where it left off. Personas do not keep episodic memory.
+  coordinator resumes where it left off. Personas keep no episodic memory.
 - **Domain lessons (persona tier)** — deliberate, curated writes only. A persona
-  records a durable lesson either as a managed skill (a `SKILL.md` under
-  `~/.omp/agent/managed-skills/<persona>/`) or into its own memory bank, and only
+  records a durable lesson as a managed skill
+  (`~/.omp/agent/managed-skills/<persona>/SKILL.md`) or into its own bank, always
   on an explicit call — never automatic per-turn capture.
 - **Project (both roles)** — repo-scoped knowledge that lives once in the vault
-  and is surfaced into the repo through **project pointers** (see below).
+  and surfaces into the repo through *project pointers* (below).
 
-**Memory backends.** The storage mode is chosen per entity via `memory.backend`:
+**Backends** are set per entity via `memory.backend`:
 
 - `off` — no memory (default).
-- `local` — project-scoped summaries/lessons distilled from session history;
-  exposes only the `learn` tool.
+- `local` — project-scoped summaries distilled from session history; exposes only
+  `learn`.
 - `hindsight` — remote, bank-scoped memory served by a Hindsight server.
 - `mnemopi` — local SQLite long-term memory with bank scoping.
 
 `hindsight` and `mnemopi` expose `recall` / `retain` / `reflect`; `mnemopi` adds
-`memory_edit`. `local` is deliberately minimal (`learn` only).
+`memory_edit`.
 
-**Memory banks and scoping.** In the `mnemopi` and `hindsight` backends the *bank*
-is the unit of storage, and a **scoping mode** controls which bank an entity reads
-and writes:
+**Banks and scoping.** In `mnemopi` and `hindsight` the *bank* is the unit of
+storage, and a scoping mode controls which bank an entity reads and writes:
 
-- `global` — one shared bank for everyone.
-- `per-project` — an isolated bank per working directory (keyed by the directory
-  basename plus a stable hash).
-- `per-project-tagged` — writes land in the project bank, but recall spans both
-  the project bank and the global bank.
+- `global` — one shared bank.
+- `per-project` — an isolated bank per working directory (keyed by basename plus
+  a stable hash).
+- `per-project-tagged` — writes land in the project bank; recall spans both the
+  project and global banks.
 
-**Project pointers.** Project-level knowledge is kept once, in the vault, at
-`~/vault/projects/<project>/<persona>.md`. The repo itself carries only a stub at
-`.omp/skills/<persona>-project/SKILL.md` whose body is a native OMP `@`-import
-(`@~/vault/projects/<project>/<persona>.md`). The stub resolves at read time via
-the `~/vault` symlink convention, so the same repo checkout stays portable across
-machines while the content is never duplicated.
+**Project pointers.** Project knowledge lives once, in the vault, at
+`~/vault/projects/<project>/<persona>.md`. The repo carries only a stub —
+`.omp/skills/<persona>-project/SKILL.md` — whose body is a native OMP `@`-import
+(`@~/vault/projects/<project>/<persona>.md`), resolved at read time through the
+`~/vault` symlink. Content is never duplicated, and the checkout stays portable
+across machines.
 
-**Bank-scoped memory MCP server (WS3).** An MCP server wraps
-the `BankManager` to expose `recall(bank, …)`, `retain(bank, …)`, and
-`forget(bank, id)` against *named* banks. Because a session natively binds only
-one `memory.backend`, this is what lets one running context address several banks
-at once and enforces the episodic-vs-curated retention policies at a single layer.
-
-Each entity carries its own model, memory scope, tool grants, system prompt, and
-optional local-vs-cloud hosting. Two role policies exist:
-
-- **agent** — generalist/coordinator. Broad remit, keeps **episodic** memory
-  (conversation turns) across sessions, can delegate.
-- **persona** — specialist. Narrow domain, keeps only **curated domain lessons**
-  (deliberate writes, not automatic per-turn capture). The first persona is
-  **Phi**, an OMP/pi expert.
-
-All entities share one human-browsable Markdown **vault** (Obsidian) with
-per-entity and per-project sections, backed by hybrid retrieval (vector
-similarity plus the wikilink graph) giving you both context (the graph - links between sections IS your context and semantic search via vector embeddings.
-
-OMA keeps OMP's native tool surface unchanged. It is an additive graft, not a
-rewrite: the discrete-tool model (`read`/`edit`/`bash`/`task`/MCP/skills) is
-exactly OMP's. It deliberately does **not** adopt Prime Agent's single-tool
-Python/RLM kernel model.
+**Bank-scoped memory MCP server (WS3).** An MCP server wraps `BankManager` to
+expose `recall(bank, …)`, `retain(bank, …)`, and `forget(bank, id)` against
+*named* banks. A session natively binds only one `memory.backend`, so this is
+what lets one running context address several banks at once, enforcing the
+episodic-vs-curated retention policies in a single layer.
 
 ## Why it was created
 
-AI is changing the way we write code - the way we work, at a very fundamental level. As agentic capabilities grow we need to adapt our tooling and workflows to grow with it. That is the idea behind OMA - a harness that enables the user to reliably benefit from the advantages that AI provides while minimizing the 'slop' that occurs when AI is let loose without sufficient oversight and context. 
+AI is changing how we write code — how we work — at a fundamental level. As
+agentic capabilities grow, our tooling and workflows have to grow with them.
+That is the idea behind OMA: a harness that lets you reliably benefit from what
+AI offers while minimizing the 'slop' that appears when AI is let loose without
+enough oversight and context.
 
-There are several angles to this: 
-* **Entities** (domain specialists and agents with specific remits) providing context and guide-rails assisting users to give AI what it needs in order to function as they expect - this allows users to leverage the AI without having to spell out their intent as explicitly and exhaustively as the tooling requires. 
-* **Project-level persistent memory** independent of a projects source-code - this allows the AI to maintain persistent context between sessions and between tasks - streamlining what you need to keep track of so you can focus on work instead of maintaining state for the AI
-* **Registires that maintain entities, skills, as well as project knowledge**, allowing you to maintain separate biomes without risk of unwanted cross-pollination.
-* **Context as variables** - The context window is one of the biggest limitations of modern day AI - only so much information can be passed through to a model at any given turn - when that context bloats the model loses track of what is important and capability drops sharply. To mitigate this, OMA takes a leaf out of Prime Agents book - context stored in variables outside the context and then injected as required - with a manifest preventing loss of state between compactions
-* **Stateful agents** - A daemon called agentD manages state independent of the user session - this opens a lot of doors that I have not even begun to explore yet, at the moment the benefits are limited to keeping context between sessions where appropriate and allowing agents to interact with each other directly
-* **Graph+Vector RAG** - The combination of graph and vector based knowledge retrieval means you get what you're looking for - even if you can't remember the exact phrasing in the information you are searching for - And links between information chunks give you and the AI sufficient context without drowning you in walls of text
+There are several angles to this:
+- **Entities** — domain specialists and agents with specific remits that supply
+  context and guard-rails, so you can leverage the AI without spelling your
+  intent out as exhaustively as the raw tooling demands.
+- **Project-level persistent memory** — independent of a project's source, so the
+  AI keeps context across sessions and tasks. You focus on the work instead of
+  re-establishing state for the AI each time.
+- **Registries** that hold entities, skills, and project knowledge, keeping
+  separate biomes without unwanted cross-pollination.
+- **Context as variables** — the context window is one of AI's hardest limits:
+  only so much fits per turn, and once it bloats the model loses track of what
+  matters and capability drops sharply. Borrowing from Prime Agent, OMA stores
+  context in variables outside the window and injects it on demand, with a
+  manifest that preserves state across compactions.
+- **Stateful agents** — a daemon (agentD) manages state independent of your
+  session. Today that mainly means keeping context between sessions and letting
+  agents talk to each other directly; the wider possibilities I've barely begun
+  to explore.
+- **Graph + vector RAG** — combining graph and vector retrieval finds what you're
+  after even when you can't recall the exact phrasing, and the links between
+  chunks give you and the AI enough context without drowning in walls of text.
 
 ## Architecture at a glance
 
