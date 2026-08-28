@@ -21,6 +21,10 @@ Mark an item `[x]` when addressed (ideally by the PR that resolves it); leave
 `[ ]` while open. Deep technical threads get their own note under
 `investigations/` and are linked from here rather than restated.
 
+## ACP cold-start model discovery — fix(coding-agent): wait for ACP config/restore
+
+Pushed to `oma` (PR pending). No outstanding follow-ups.
+
 ## Registry domains (ADR 0004) — feat(oma/registry): per-domain vault isolation
 
 Pushed to `oma` (PR pending). Two-axis cross-seam review passed with **zero
