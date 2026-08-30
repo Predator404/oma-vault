@@ -4,7 +4,7 @@ page: Changelog
 project: oh-my-pi-agents
 maintained-by: phi
 status: draft — for review
-updated: 2026-08-24
+updated: 2026-08-30
 ---
 
 # OMA — Changelog
@@ -19,7 +19,7 @@ OMA carries **two independent version numbers**:
 
 - **`omp` (upstream-synced)** — the OMP release OMA is rebased onto. It moves
   **only on an upstream rebase**, not on OMA's own work. Current base:
-  **`omp 18.0.4`**. Pure OMP-core fixes that we contribute back upstream (e.g.
+  **`omp 18.0.11`**. Pure OMP-core fixes that we contribute back upstream (e.g.
   the mnemopi and compaction fixes below) belong to this track and ride the OMP
   changelog, not the agent one.
 - **`oma-agent`** — SemVer keyed to **agent-portion PR merges**: a feature bumps
@@ -41,7 +41,35 @@ Every entry below is tagged `oma-agent X.Y.Z · on omp A.B.C`.
 
 ## [Unreleased]
 
-_Nothing pending._
+- 🔧 **`rebaseForkOnUpstream` skill.** New OH-MY-PI skill encapsulating the
+  fork-rebase procedure this work uses: map remotes, find the true fork point
+  (merge-base, not `origin/main`), fold in WIP and unpulled fork commits, replay
+  onto `upstream/main` with a fork-features-win / upstream-renames-supersede
+  conflict policy, verify, and `--force-with-lease` push. Generalized to any
+  fork with downstream changes. (`.omp/skills/rebaseForkOnUpstream`)
+- 🔧 **CHANGELOG reconciled after rebase.** Removed the released
+  `[18.0.4]–[18.0.1]` sections the rebase had duplicated from upstream and moved
+  the OMA-specific entries into `[Unreleased]`, so the released sections now
+  match upstream. (`3abcdda0`)
+- 🐞 **Dev launchers resolve Bun off PATH.** The `omp`/`oma` launchers now find
+  Bun in `~/.bun/bin` or `$BUN_INSTALL/bin` when it is not on PATH, fixing
+  `bun: not found` from GUI/cron/non-interactive contexts. (`02052e8a`)
+
+> ### 🔄 UPSTREAM REBASE — `omp 18.0.4` → `omp 18.0.11` (2026-08-30)
+>
+> OMA rebased from its previously recorded base (`omp 18.0.4`) onto current
+> upstream `main`, which corresponds to **OMP 18.0.11**, resolving roughly
+> **~1479 commits** of upstream drift. All 23 fork commits were replayed;
+> conflict resolutions kept every fork feature (the `@@` entity picker, the
+> `πA` brand marker, per-entity colour, `getBubbleBgAnsi`) while adopting
+> upstream's evolved names (e.g. `speculativeSuffixStartId` →
+> `providerReplayThroughEntryId`). Post-rebase type/lint errors fixed; the OMA
+> suites pass.
+>
+> **OMP changelog for this range:**
+> - Release notes: [omp v18.0.11](https://github.com/can1357/oh-my-pi/releases/tag/v18.0.11)
+> - Full diff: [v18.0.4...v18.0.11](https://github.com/can1357/oh-my-pi/compare/v18.0.4...v18.0.11)
+> - Changelog file at the tag: [CHANGELOG.md @ v18.0.11](https://github.com/can1357/oh-my-pi/blob/v18.0.11/packages/coding-agent/CHANGELOG.md)
 
 ## 2026-08-24 — `oma-agent 0.7.0 · on omp 18.0.0`
 
