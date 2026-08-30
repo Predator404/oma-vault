@@ -51,6 +51,11 @@ _Nothing pending._
   onto `upstream/main` with a fork-features-win / upstream-renames-supersede
   conflict policy, verify, and `--force-with-lease` push. Generalized to any
   fork with downstream changes. (`.omp/skills/rebaseForkOnUpstream`)
+ - 🔧 **`omaChangelogUpdate` skill.** Encapsulates the phi OMA-changelog flow:
+   OMA's own work gets its own `oma-agent`-versioned dated entry, upstream
+   rebases stay in separate block quotes, the `omp` base is read from the
+   fork's rebase target, and the vault commit/push is done alone (never the
+   repo CHANGELOG). (`.omp/skills/omaChangelogUpdate`)
 - 🐞 **Dev launchers resolve Bun off PATH.** The `omp`/`oma` launchers now find
   Bun in `~/.bun/bin` or `$BUN_INSTALL/bin` when it is not on PATH, fixing
   `bun: not found` from GUI/cron/non-interactive contexts. (`02052e8a`)
