@@ -66,6 +66,16 @@ at a later date (non-blocking).
   Decide the `OMP_*` env-var policy (keep for compat vs `OMA_*` aliases) and
   whether the stale `~/.omp` dir is migrated/retired. _(Evidence: live agent dir
   is `~/.oma/agent`; a stale `~/.omp/agent` still exists.)_
+- [ ] **Remove the legacy `.omp`-targeted registry config.** The stale
+  `~/.omp/agent/registries.json` (and its `AGENTS.md`) still define the `oma`
+  registry (root `~/Work/git/oma-vault`), but this build resolves its agent dir
+  to `~/.oma/agent` (`PI_CONFIG_DIR=.oma`), so that manifest is dead config — it
+  was the reason `@@` showed no entities: with no `~/.oma/agent/registries.json`,
+  discovery silently falls back to an empty synthesized registry
+  (`~/.oma/agent/registry/entities`). The live manifest now sits at
+  `~/.oma/agent/registries.json`. Confirm nothing reads `~/.omp/agent`, then
+  delete or migrate the stale `registries.json` + registry notes so the two can
+  never drift. Folds into the naming sweep above. _(Ops / discovered 2026-08-30)_
 - [ ] **Formalize parallelism + skill terminology/rules (per Claude CLI).** Make
   the subagent fan-out model (integration owner, disjoint file ownership,
   skip-mid-flight validation) and skill terminology explicit as skill/rules;
@@ -561,3 +571,10 @@ append (Changelog), storage-format + version-bump handling, maintenance cadence.
 Sources: atlassian.com/blog/announcements/atlassian-rovo-mcp-ga ·
 github.com/atlassian/atlassian-mcp-server · github.com/sooperset/mcp-atlassian ·
 developer.atlassian.com/cloud/confluence/rest/v2 · scalekit.com/blog/confluence-mcp-vs-api
+
+## oma-agent 0.9.1 — fix(oma): show both omp and agents versions in welcome title
+
+- [ ] **Add the concept of actions.** Keywords shown after an `@@agent:` prompt
+  — actions are specific to the agent and the autocomplete shows the available
+  actions that can safely be ignored and typed over. _(Feature / discovered
+  2026-08-31)_
