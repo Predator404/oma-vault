@@ -572,9 +572,10 @@ Sources: atlassian.com/blog/announcements/atlassian-rovo-mcp-ga ·
 github.com/atlassian/atlassian-mcp-server · github.com/sooperset/mcp-atlassian ·
 developer.atlassian.com/cloud/confluence/rest/v2 · scalekit.com/blog/confluence-mcp-vs-api
 
-## oma-agent 0.9.1 — fix(oma): show both omp and agents versions in welcome title
+## Agent UX
 
-- [ ] **Add the concept of actions.** Keywords shown after an `@@agent:` prompt
-  — actions are specific to the agent and the autocomplete shows the available
-  actions that can safely be ignored and typed over. _(Feature / discovered
-  2026-08-31)_
+- [ ] **Agent actions — keywords after `@@agent:` prompt.** After addressing an
+  agent with `@@name:`, show available action keywords specific to that agent
+  via autocomplete. Actions can safely be ignored and typed over. _(Feature /
+  discovered 2026-08-31)_
+
