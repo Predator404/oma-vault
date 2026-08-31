@@ -4,7 +4,7 @@ page: Changelog
 project: oh-my-pi-agents
 maintained-by: phi
 status: draft — for review
-updated: 2026-08-30
+updated: 2026-08-31
 ---
 
 # OMA — Changelog
@@ -24,7 +24,7 @@ OMA carries **two independent version numbers**:
   changelog, not the agent one.
 - **`oma-agent`** — SemVer keyed to **agent-portion PR merges**: a feature bumps
   the minor, a fix bumps the patch. This is the number that describes the
-  persistent-agent build itself. Current: **`oma-agent 0.8.0`**.
+  persistent-agent build itself. Current: **`oma-agent 0.9.0`**.
 
 Every entry below is tagged `oma-agent X.Y.Z · on omp A.B.C`.
 
@@ -42,6 +42,16 @@ Every entry below is tagged `oma-agent X.Y.Z · on omp A.B.C`.
 ## [Unreleased]
 
 _Nothing pending._
+
+## 2026-08-31 — `oma-agent 0.9.0 · on omp 18.0.11`
+
+- 🚀 **π+A hybrid brand logo.** The block-grid `PI_LOGO` now carries a faded
+  `░░` crossbar between the π legs, creating a stylized π+A mark. Renders
+  through all gradient-logo surfaces (welcome, setup splash, outro, wizard
+  overlay).
+- 🐞 **Brand timer no longer leaks the "A" suffix.** The active-turn spinner +
+  timer (`⠋ 13s`) was appending the OMA "A" marker from the idle brand,
+  producing `13sA`. The suffix now stays on the idle `πA` brand only.
 
 ## 2026-08-30 — `oma-agent 0.8.0 · on omp 18.0.11`
 
