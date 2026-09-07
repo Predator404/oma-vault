@@ -4,7 +4,7 @@ page: Changelog
 project: oh-my-pi-agents
 maintained-by: phi
 status: draft — for review
-updated: 2026-08-31
+updated: 2026-09-07
 ---
 
 # OMA — Changelog
@@ -24,7 +24,7 @@ OMA carries **two independent version numbers**:
   changelog, not the agent one.
 - **`oma-agent`** — SemVer keyed to **agent-portion PR merges**: a feature bumps
   the minor, a fix bumps the patch. This is the number that describes the
-  persistent-agent build itself. Current: **`oma-agent 0.9.0`**.
+  persistent-agent build itself. Current: **`oma-agent 0.10.0`**.
 
 Every entry below is tagged `oma-agent X.Y.Z · on omp A.B.C`.
 
@@ -42,6 +42,17 @@ Every entry below is tagged `oma-agent X.Y.Z · on omp A.B.C`.
 ## [Unreleased]
 
 _Nothing pending._
+
+## 2026-09-07 — `oma-agent 0.10.0 · on omp 18.0.11`
+
+- 🔧 **OMA skills: native-bindings rebuild step + semantic compression.** Added a
+  required `bun run build:native` step to the `rebaseForkOnUpstream` skill's
+  verify phase — `bun check` alone never invokes the Rust toolchain, leaving
+  stale `.node` exports after upstream crate changes. Applied progressive
+  disclosure and semantic compression to all four OMA-specific skills
+  (`rebaseForkOnUpstream`, `commitToSourceControl`, `followup`,
+  `omaChangelogUpdate`), cutting context bloat while preserving every normative
+  obligation.
 
 ## 2026-08-31 — `oma-agent 0.9.0 · on omp 18.0.11`
 
