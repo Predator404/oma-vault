@@ -54,6 +54,26 @@ _Nothing pending._
   `omaChangelogUpdate`), cutting context bloat while preserving every normative
   obligation.
 
+## 2026-09-04 — `oma-agent 0.9.1 · on omp 18.0.11`
+
+- 🔧 **`commitToSourceControl` skill.** New OMA skill encapsulating the full
+  release pipeline: inventory → classify → version bump → build → vault
+  changelog → commit both repos → push → optional PR. Includes bump rules
+  (patch/minor/major), conventional commit prefixes, and a two-repo gotchas
+  section. (`.omp/skills/commitToSourceControl`, `0dc24265`)
+- 🔧 **`followup` skill.** Captures `@@Phi: follow-up - <text>` triggers into
+  the vault follow-up register under topic sections and pushes the vault.
+  (`531321262`)
+- 🚀 **Welcome title shows both `omp` and `oma-agent` versions.** The OMA
+  welcome header now renders both version tracks so the running build is
+  unambiguous at a glance. (`0dc24265`)
+- 🐞 **Post-rebase reconciliation fixes.** Kernel registry types reconciled and
+  dead Ruby import removed after upstream rebase (`46a0a6b5`);
+  `OMP_ENTITY_REGISTRY` env var now bypasses the registry manifest for
+  legacy single-registry setups (`45479b02`); `sherpa-onnx-node` and
+  `transformers` added to compiled externals so they bundle correctly
+  (`c6110914`).
+
 ## 2026-08-31 — `oma-agent 0.9.0 · on omp 18.0.11`
 
 - 🚀 **π+A hybrid brand logo.** The block-grid `PI_LOGO` now carries a faded
@@ -99,14 +119,20 @@ _Nothing pending._
 > - Release notes: [omp v18.0.11](https://github.com/can1357/oh-my-pi/releases/tag/v18.0.11)
 > - Full diff: [v18.0.4...v18.0.11](https://github.com/can1357/oh-my-pi/compare/v18.0.4...v18.0.11)
 > - Changelog file at the tag: [CHANGELOG.md @ v18.0.11](https://github.com/can1357/oh-my-pi/blob/v18.0.11/packages/coding-agent/CHANGELOG.md)
-## 2026-08-24 — `oma-agent 0.7.0 · on omp 18.0.0`
 
+## 2026-08-24 — `oma-agent 0.7.0 · on omp 18.0.0`
 - 🚀 **Per-domain vault registry isolation.** Split the vault into per-domain
   registries (`oma` public, `capitec` private) with hermetic entities,
   directional read rules (private→public plus named private→private grants), a
   registry manifest, and path-jailed multi-root vault access. Hard
   confidentiality isolation for the regulated environment. (ADR 0004,
   `ea0a65be`)
+
+## 2026-08-25 — `oma-agent 0.7.1 · on omp 18.0.0`
+
+- 🔧 **`unslop` skill.** Vendored the unslop skill (removes AI-generated
+  writing patterns, em-dash/colon/bold overuse, sycophancy, filler, and
+  hedging; adds human voice). (`a1312c37`)
 
 ## 2026-08-23 — `oma-agent 0.6.1 · on omp 18.0.0`
 
