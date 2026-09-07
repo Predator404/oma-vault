@@ -120,6 +120,12 @@ _Nothing pending._
 > - Full diff: [v18.0.4...v18.0.11](https://github.com/can1357/oh-my-pi/compare/v18.0.4...v18.0.11)
 > - Changelog file at the tag: [CHANGELOG.md @ v18.0.11](https://github.com/can1357/oh-my-pi/blob/v18.0.11/packages/coding-agent/CHANGELOG.md)
 
+## 2026-08-25 — `oma-agent 0.7.1 · on omp 18.0.0`
+
+- 🔧 **`unslop` skill.** Vendored the unslop skill (removes AI-generated
+  writing patterns, em-dash/colon/bold overuse, sycophancy, filler, and
+  hedging; adds human voice). (`a1312c37`)
+
 ## 2026-08-24 — `oma-agent 0.7.0 · on omp 18.0.0`
 - 🚀 **Per-domain vault registry isolation.** Split the vault into per-domain
   registries (`oma` public, `capitec` private) with hermetic entities,
@@ -127,12 +133,6 @@ _Nothing pending._
   registry manifest, and path-jailed multi-root vault access. Hard
   confidentiality isolation for the regulated environment. (ADR 0004,
   `ea0a65be`)
-
-## 2026-08-25 — `oma-agent 0.7.1 · on omp 18.0.0`
-
-- 🔧 **`unslop` skill.** Vendored the unslop skill (removes AI-generated
-  writing patterns, em-dash/colon/bold overuse, sycophancy, filler, and
-  hedging; adds human voice). (`a1312c37`)
 
 ## 2026-08-23 — `oma-agent 0.6.1 · on omp 18.0.0`
 
